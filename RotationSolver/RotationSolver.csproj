@@ -44,5 +44,7 @@
 
 	<ItemGroup>
 	  <PackageReference Update="DalamudPackager" Version="13.1.0" />
+      <None Remove="Translations.json" />
+      <EmbeddedResource Include="Translations.json" />
 	</ItemGroup>
 </Project>

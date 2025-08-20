@@ -215,6 +215,7 @@ internal static class RotationUpdater
 
         CustomRotationsLookup = []; // CustomRotations aren't disposed or we'd want to loop through and dispose them
         return [.. result];
+        
     }
 
     private static void PrintLoadedAssemblies(IEnumerable<string>? assemblies)
@@ -282,11 +283,11 @@ internal static class RotationUpdater
                 }
                 else if (act.Info.IsSystemAction)
                 {
-                    key = "System Action";
+                    key = "共通技能";
                 }
                 else if (act.Action.IsRoleAction)
                 {
-                    key = "Role Action";
+                    key = "职能技能";
                 }
                 else if (act.Info.IsPvPLimitBreak && DataCenter.IsPvP)
                 {
@@ -294,28 +295,28 @@ internal static class RotationUpdater
                 }
                 else if (act.Info.IsLimitBreak && !DataCenter.IsPvP)
                 {
-                    key = "Limit Break";
+                    key = "极限技（LB）";
                 }
                 else if (act.Info.IsDutyAction)
                 {
-                    key = "Duty Action";
+                    key = "任务技能";
                 }
                 else
                 {
                     key = act.Info.IsRealGCD ? "GCD" : "oGCD";
                     if (act.Setting.IsFriendly)
                     {
-                        key += "-Friendly";
+                        key += "-其他";
                     }
                     else
                     {
-                        key += "-Attack";
+                        key += "-输出";
                     }
                 }
             }
             else if (a is IBaseItem && !DataCenter.IsPvP)
             {
-                key = "Item";
+                key = "物品";
             }
 
             // Always add to groups since we now have meaningful keys for all cases

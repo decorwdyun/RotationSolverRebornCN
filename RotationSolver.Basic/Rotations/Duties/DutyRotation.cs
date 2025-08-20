@@ -296,7 +296,7 @@ public partial class DutyRotation : IDisposable
     /// <summary>
     /// Gets the name of the current active Phantom Job, or None if none are active.
     /// </summary>
-    public static string? ActivePhantomJob => GetPhantomJob().ToString();
+    public static string? ActivePhantomJob => GetPhantomJob().ToFriendlyString();
 
     public static byte FreelancerLevel
     {
@@ -448,6 +448,30 @@ public partial class DutyRotation : IDisposable
 
             return [.. actionsList];
         }
+    }
+}
+
+public static class PhantomJobExtensions
+{
+    public static string ToFriendlyString(this DutyRotation.PhantomJob phantomJob)
+    {
+        return phantomJob switch
+        {
+            DutyRotation.PhantomJob.Freelancer => "自由人",
+            DutyRotation.PhantomJob.Knight => "骑士",
+            DutyRotation.PhantomJob.Berserker => "狂战士",
+            DutyRotation.PhantomJob.Monk => "武僧",
+            DutyRotation.PhantomJob.Ranger => "猎人",
+            DutyRotation.PhantomJob.Samurai => "武士",
+            DutyRotation.PhantomJob.Bard => "吟游诗人",
+            DutyRotation.PhantomJob.Geomancer => "风水师",
+            DutyRotation.PhantomJob.TimeMage => "时魔法师",
+            DutyRotation.PhantomJob.Cannoneer => "炮击士",
+            DutyRotation.PhantomJob.Chemist => "药剂师",
+            DutyRotation.PhantomJob.Oracle => "预言师",
+            DutyRotation.PhantomJob.Thief => "盗贼",
+            _ => phantomJob.ToString(),
+        };
     }
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

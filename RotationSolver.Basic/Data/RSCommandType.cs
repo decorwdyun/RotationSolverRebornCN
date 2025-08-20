@@ -121,6 +121,20 @@ public enum StateCommandType : byte
     AutoDuty,
 }
 
+public static class StateCommandTypeExtensions
+{
+    public static string ToFriendlyString(this StateCommandType stateCommandType)
+    {
+        return stateCommandType switch
+        {
+            StateCommandType.Off => "关闭",
+            StateCommandType.Auto => "自动目标",
+            StateCommandType.Manual => "手动目标",
+            _ => stateCommandType.ToString(),
+        };
+    }
+}
+
 /// <summary>
 /// Some Other Commands.
 /// </summary>
