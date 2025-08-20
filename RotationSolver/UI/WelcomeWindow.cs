@@ -14,11 +14,11 @@ namespace RotationSolver.UI
         {
             Size = new Vector2(650, 500);
             SizeCondition = ImGuiCond.FirstUseEver;
-            if (((_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup) || !Service.Config.FirstTimeSetupDone) && Service.Config.ChangelogPopup)
-            {
-                PopulateChangelogs();
-                IsOpen = true;
-            }
+            // if (((_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup) || !Service.Config.FirstTimeSetupDone) && Service.Config.ChangelogPopup)
+            // {
+            //     PopulateChangelogs();
+            //     IsOpen = true;
+            // }
         }
 
         private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse
