@@ -10,11 +10,9 @@ namespace RotationSolver.Updaters
     public static class ActionQueueManager
     {
         // Action Manager Hook for intercepting user input
-        private static Hook<UseActionDelegate>? _useActionHook;
+        private static Hook<ActionManager.Delegates.UseAction>? _useActionHook;
 
         // Delegates for ActionManager functions
-        private unsafe delegate bool UseActionDelegate(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget);
-
         public static void Enable()
         {
             // Initialize hooks
@@ -33,7 +31,7 @@ namespace RotationSolver.Updaters
             {
                 var useActionAddress = ActionManager.Addresses.UseAction.Value;
 
-                _useActionHook = Svc.Hook.HookFromAddress<UseActionDelegate>(useActionAddress, UseActionDetour);
+                _useActionHook = Svc.Hook.HookFromAddress<ActionManager.Delegates.UseAction>(useActionAddress, UseActionDetour);
 
                 _useActionHook?.Enable();
 
@@ -61,20 +59,20 @@ namespace RotationSolver.Updaters
             }
         }
 
-        private static unsafe bool UseActionDetour(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget)
+        private static unsafe bool UseActionDetour(ActionManager* actionManager, ActionType type, uint actionId, ulong targetId, uint param, ActionManager.UseActionMode useType, uint comboRouteId, bool* isGroundTarget)
         {
             if (Player.Available && Service.Config.InterceptAction2 && DataCenter.State && DataCenter.InCombat && !DataCenter.IsPvP)
             {
                 try
                 {
-                    if (actionType == 1 && (useType != 2 || Service.Config.InterceptMacro)) // ActionType.Action == 1
+                    if (type == ActionType.Action && (useType != ActionManager.UseActionMode.Macro || Service.Config.InterceptMacro)) // ActionType.Action == 1
                     {
                         // Always compute adjusted ID first to keep logic consistent
-                        uint adjustedActionId = Service.GetAdjustedActionId(actionID);
+                        uint adjustedActionId = Service.GetAdjustedActionId(actionId);
 
                         if (adjustedActionId == 7419 && _useActionHook?.Original != null)
                         {
-                            return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+                            return _useActionHook.Original(actionManager, type, actionId, targetId, param, useType, comboRouteId, isGroundTarget);
                         }
 
                         if (ShouldInterceptAction(adjustedActionId))
@@ -83,7 +81,7 @@ namespace RotationSolver.Updaters
                             var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
                             var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 
-                            PluginLog.Debug($"[ActionQueueManager] Detected player input: ID={actionID}, AdjustedID={adjustedActionId}");
+                            PluginLog.Debug($"[ActionQueueManager] Detected player input: ID={actionId}, AdjustedID={adjustedActionId}");
 
                             var matchingAction = ((ActionID)adjustedActionId).GetActionFromID(false, rotationActions, dutyActions);
 
@@ -103,7 +101,7 @@ namespace RotationSolver.Updaters
                                     }
                                     else
                                     {
-                                        HandleInterceptedAction(matchingAction, actionID);
+                                        HandleInterceptedAction(matchingAction, actionId);
                                         return false; // Block the original action
                                     }
                                 }
@@ -124,7 +122,7 @@ namespace RotationSolver.Updaters
             // Call original function if available, otherwise return true (allow action)
             if (_useActionHook?.Original != null)
             {
-                return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+                return _useActionHook.Original(actionManager, type, actionId, targetId, param, useType, comboRouteId, isGroundTarget);
             }
 
             // Return true to allow the action to proceed if hook is unavailable
