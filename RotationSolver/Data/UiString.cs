@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using ECommons.Logging;
+using RotationSolver.Helpers;
 
 namespace RotationSolver.Data
 {
@@ -664,7 +666,7 @@ namespace RotationSolver.Data
 
             DescriptionAttribute? attribute = field.GetCustomAttribute<DescriptionAttribute>();
 
-            string descString = attribute == null ? value.ToString() : attribute.Description;
+            string descString = attribute == null ? I18NHelper.Translate(value.ToString()) : I18NHelper.Translate(attribute.Description);
             _enumDescriptions.Add(value, descString);
             return descString;
         }
