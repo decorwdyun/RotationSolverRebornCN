@@ -28,6 +28,7 @@ using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.Updaters;
 using System.Diagnostics;
 using System.Text;
+using Lumina.Excel.Sheets;
 using GAction = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
 
@@ -57,46 +58,44 @@ public partial class RotationConfigWindow : Window
     // Hints system fields
     private static readonly string[] _usageHints =
     [
-        "Right-click any action, setting, or toggle to view/copy its macro chat command.",
-        "Use /rsr as a shorter alias for /rotation.",
-        "Use /rotation Auto, /rotation Manual, or /rotation Off to change modes quickly.",
-        "Use the search box (top-left) to jump directly to settings.",
-        "Click the external-link icon in search results to jump to that menu.",
-        "Right-click a setting label to copy a ready-to-use /rotation Settings command.",
-        "Actions tab: click an action icon to configure, enable/disable, or set hotkeys.",
-        "Actions: toggle 'Show on CD Window' to include an action in the cooldown overlay.",
-        "Actions: enable 'Intercepted' to let RSR fire an action you queue (PvE only).",
-        "UI > Information: enable DTR status, toasts, original cooldowns, and these hints.",
-        "UI > Windows: enable Next Action, Control, Cooldown, and Timeline windows.",
-        "Next Action: 'No Inputs' and 'No Move' options change overlay behavior.",
-        "Only show windows in duty or with enemies: UI > Windows > Only show with hostile or in duty.",
-        "List tab: manage dispels, priority statuses, knockbacks, invincibility, and no-casting lists.",
-        "List tab: use 'Reset and Update' to restore curated lists quickly.",
-        "Status lists: press '+' to search by name or ID; fuzzy search is supported.",
-        "Status lists: right-click an icon to remove; Delete key works in the popup too.",
-        "Target tab: tweak target selection, vision cone, engage behavior, and dummy/boss handling.",
-        "Target tab: set /rotation Cycle behaviour and targeting delays.",
-        "Manage TargetingTypes via chat: /rotation Settings TargetingTypes add|remove <Type>.",
-        "Auto > Action Usage: allow/deny oGCDs, set AoE style, tinctures, interrupts, and True North.",
-        "Auto > Healing: adjust thresholds and non-healer healing behavior.",
-        "Healer: customize Raise/Swiftcast and prioritization in Auto > Healing.",
-        "Ground AoEs: Auto > Healing has options to place beneficial ground actions smartly.",
-        "Basic > Timer: tune Action Ahead and Min Updating Time to balance performance vs weaving.",
-        "Basic > Auto Switch: auto on/off for countdowns, deaths, area transitions, and more.",
-        "Teaching Mode highlights targets; color is in UI > Information.",
-        "Job tab: edit DNC partner, SGE Kardia tank, and AST card priorities when on those jobs.",
-        "About > Macros lists available chat/macro commands and helpful syntax.",
-        "About > Links: open config folder, GitHub, Ko-fi, and Discord.",
-        "Extra > Internal: Backup/Restore configs safely.",
-        "Extra: optional tweaks like removing animation/cooldown delay.",
-        "Click the cube icon at the bottom-left of the sidebar to copy diagnostic info to clipboard.",
-        "Timeline window can visualize recent actions (UI > Windows).",
-        "Do damage, don't die",
-        "Healing Tip: the only HP that matters is the last one",
-        "Be kind",
-        "The icons for Combat Reborn were made by a player named Altan",
-        "Tip: you can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
-        "Tip: RSR works best with Legacy Type movement settings."
+        "右键点击任意技能、设置或开关，可以查看或复制对应的宏命令。",  
+        "可以使用 /rsr 作为 /rotation 的简写指令。",  
+        "使用 /rotation Auto、/rotation Manual 或 /rotation Off 来快速切换模式。",  
+        "用左上角的搜索框可以直接跳到对应的设置。",  
+        "点击搜索结果里的外链图标可以快速打开对应菜单。",  
+        "右键点击某个设置的名字，可以复制一个可直接使用的 /rotation Settings 命令。",  
+        "技能页签：点击技能图标可进行设置、启用/停用，或绑定快捷键。",  
+        "技能：勾选“显示在冷却窗口”可将技能加入冷却监控中。",  
+        "技能：启用“拦截”功能可让 RSR 帮你释放你手动排入队列的技能（仅限 PvE）。",  
+        "UI > 信息：可以启用 DTR 状态栏、提示气泡、原始冷却时间显示以及这些小提示。",  
+        "UI > 窗口：可开启“下一个技能”、“控制”、“冷却”和“时间线”等窗口。",  
+        "下一个技能窗口：“无输入”和“禁止移动”选项可调整叠加层的行为。",  
+        "仅在副本或有敌对目标时显示窗口：UI > 窗口 > 仅在有敌对或副本中显示。",  
+        "列表页签：用于管理驱散、优先状态、击退、无敌和禁止施法列表。",  
+        "列表页签：使用“重置并更新”可快速恢复推荐列表。",  
+        "状态列表：点击“+”可按名字或 ID 搜索，支持模糊搜索。",  
+        "状态列表：右键点击图标可移除，该弹窗中按 Delete 键也能删除。",  
+        "目标页签：可调整目标选择、视野角度、进战逻辑以及 木人/Boss 处理方式。",  
+        "目标页签：可设置 /rotation Cycle 的行为和目标切换延迟。",  
+        "通过聊天命令管理 TargetingTypes：/rotation Settings TargetingTypes add|remove <Type>。",  
+        "自动 > 技能使用：可设置允许/禁用 oGCD（非公共 CD）技能、AOE 模式、爆发药、打断和真北等。",  
+        "自动 > 治疗：调节血量阈值和非治疗职业的治疗行为。",  
+        "治疗职业：可在 自动 > 治疗 中自定义复活/即刻咏唱和目标优先级。",  
+        "地面技能：自动 > 治疗 可设置智能放置地面增益技能。",  
+        "基础 > 计时：调整“提前释放时间”和“最小更新间隔”来平衡性能与循环。",  
+        "基础 > 自动切换：可在倒计时、死亡、区域切换等情况下自动开/关 RSR 循环。",   
+        "职业页签：在对应职业时可调整 DNC 的搭档、SGE 的心念目标以及 AST 的卡牌优先级。",  
+        "关于 > 宏命令：列出了可用的聊天/宏命令及语法说明。",  
+        "关于 > 链接：可打开配置文件夹、GitHub、Ko-fi 和 Discord。",  
+        "额外 > 内部：可安全备份/恢复配置。",  
+        "额外：提供一些可选优化，比如去除动画或冷却延迟。",  
+        "点击左下角侧边栏的立方体图标可复制诊断信息到剪贴板。",  
+        "时间线窗口可视化最近使用过的技能（UI > 窗口）。",  
+        "打出伤害，别死。",  
+        "治疗小贴士：唯一重要的血量是最后一滴。",  
+        "善待他人。",  
+        "Combat Reborn 的图标由一位名叫 Altan 的玩家制作。",  
+        "小提示：RSR 最适合与“传统移动方式（Legacy Type）”搭配使用。"
     ];
     private int _hintIndex = 0;
     private float _lastHintSwitch = 0f;
@@ -120,7 +119,7 @@ public partial class RotationConfigWindow : Window
             ShowTooltip = () =>
             {
                 ImGui.BeginTooltip();
-                ImGui.Text("Click to reset plugin configs");
+                ImGui.Text("点击重置插件设置");
                 ImGui.EndTooltip();
             },
             Priority = 3,
@@ -137,7 +136,7 @@ public partial class RotationConfigWindow : Window
             ShowTooltip = () =>
             {
                 ImGui.BeginTooltip();
-                ImGui.Text("Support the developer on Ko-fi");
+                ImGui.Text("在 Ko-fi 上支持开发者");
                 ImGui.EndTooltip();
             },
             Priority = 2,
@@ -243,19 +242,19 @@ public partial class RotationConfigWindow : Window
         using var popupTabRounding = ImRaii.PushStyle(ImGuiStyleVar.TabRounding, 11f * Scale);
         if (ImGui.BeginPopupModal("Reset RSR Plugin Settings"))
         {
-            ImGui.Text("Are you sure you want to reset all plugin settings?");
-            ImGui.Spacing();
-            ImGui.Text("This is often recommended for users having issues while using an installation of RSR using an outdated default configuration.");
+            ImGui.Text("确定要重置所有插件设置吗？");  
+            ImGui.Spacing();  
+            ImGui.Text("如果你在使用旧版默认配置的 RSR 时遇到问题，通常推荐执行此操作。");  
             ImGui.Spacing();
 
-            if (ImGui.Button("Yes", new Vector2(120, 0)))
+            if (ImGui.Button("重置", new Vector2(120, 0)))
             {
                 Service.Config = new Configs();
                 Service.Config.Save();
                 ImGui.CloseCurrentPopup();
             }
             ImGui.SameLine();
-            if (ImGui.Button("No", new Vector2(120, 0)))
+            if (ImGui.Button("取消", new Vector2(120, 0)))
             {
                 ImGui.CloseCurrentPopup();
             }
@@ -425,7 +424,7 @@ public partial class RotationConfigWindow : Window
             ImGui.SetClipboardText(diagInfo.ToString());
         }
     }
-
+    
     private void DrawSideBar()
     {
         using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Side bar", -Vector2.One, false, ImGuiWindowFlags.NoScrollbar);
@@ -451,10 +450,10 @@ public partial class RotationConfigWindow : Window
                     continue;
                 }
 
-                string displayName = item.ToString();
+                string displayName = item.ToFriendlyString();
                 if (item == RotationConfigWindowTab.Job && Player.Object != null)
                 {
-                    displayName = Player.Job.ToString(); // Use the current player's job name
+                    displayName = GenericHelpers.GetRow<ClassJob>(Player.JobId)?.Name.ExtractText() ?? Player.Job.ToString(); // Use the current player's job name
                 }
                 else if (item == RotationConfigWindowTab.Duty && Player.Object != null)
                 {
@@ -465,11 +464,12 @@ public partial class RotationConfigWindow : Window
 
                     displayName = true switch
                     {
-                        var _ when DataCenter.IsInOccultCrescentOp => $"Duty - {DutyRotation.ActivePhantomJob}",
-                        var _ when DataCenter.InVariantDungeon => "Duty - Variant",
-                        var _ when DataCenter.IsInBozja => "Duty - Bozja",
-                        var _ when DataCenter.IsInMonsterHunterDuty => "Duty - Monster Hunter",
-                        _ => "Duty",
+
+                        var _ when DataCenter.IsInOccultCrescentOp => $"副本 - {DutyRotation.ActivePhantomJob}",
+                        var _ when DataCenter.InVariantDungeon => "副本 - 多变迷宫",
+                        var _ when DataCenter.IsInBozja => "副本 - 博兹雅",
+                        var _ when DataCenter.IsInMonsterHunterDuty => "副本 - 怪猎联动",
+                        _ => "副本",
                     };
                 }
 
@@ -860,7 +860,7 @@ public partial class RotationConfigWindow : Window
         {
             float avail = ImGui.GetContentRegionAvail().X;
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + avail);
-            ImGui.TextWrapped($"Tip: {_usageHints[_hintIndex]}");
+            ImGui.TextWrapped($"小技巧: {_usageHints[_hintIndex]}");
             ImGui.PopTextWrapPos();
         }
         ImGui.Spacing();
@@ -1192,7 +1192,8 @@ public partial class RotationConfigWindow : Window
                         longest = c.DisplayValues[i];
                 }
                 ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
-                if (ImGui.Combo(name, ref index, names, names.Length))
+                var translatedDisplayValues = c.DisplayValues.Select(I18NHelper.Translate).ToArray();
+                if (ImGui.Combo(name, ref index, translatedDisplayValues, translatedDisplayValues.Length))
                 {
                     c.Value = names[index];
                 }
@@ -1251,7 +1252,7 @@ public partial class RotationConfigWindow : Window
                 string val = config.Value;
 
                 ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-                if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
+                if (ImGui.InputTextWithHint(name, I18NHelper.Translate(config.DisplayName), ref val, 128))
                 {
                     config.Value = val;
                 }
@@ -1280,7 +1281,7 @@ public partial class RotationConfigWindow : Window
             }
 
             ImGui.SameLine();
-            ImGui.TextWrapped($"{config.DisplayName}");
+            ImGui.TextWrapped($"{I18NHelper.Translate(config.DisplayName)}");
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
     }
@@ -1308,7 +1309,40 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
         }
+        ImGui.Spacing();
+        using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
+        {
+            ImGui.TextColored(ImGuiColors.HealerGreen, "遇到问题也可以点击插件窗口右上角骷髅头重置插件配置");
+        }
+        
+        using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(14)))
+        {
+            float r = 0, g = 0, b = 0;
+            var h = (float)(ImGui.GetTime() * 0.2f % 1.0f);
+            ImGui.ColorConvertHSVtoRGB(h, 1f, 1f, ref r, ref g, ref b);
+            ImGui.TextColored(new Vector4(r, g, b, 1), "本汉化插件完全开源免费，从未委托任何人在任何渠道售卖。");
+            ImGui.TextColored(new Vector4(r, g, b, 1), "如果你是付费购买的本插件，请立即退款并差评举报。");
+        }
 
+        if (ImGui.Button("打开插件主页"))
+        {
+            Util.OpenLink("https://github.com/decorwdyun/RotationSolverRebornCN");
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("一起翻译"))
+        {
+            Util.OpenLink("https://github.com/decorwdyun/RotationSolverRebornCN/blob/cn/RotationSolver/Translations.json");
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("问题反馈"))
+        {
+            Util.OpenLink("https://github.com/decorwdyun/RotationSolverRebornCN/issues/new");
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("汉化作者维护的更多插件"))
+        {
+            Util.OpenLink("https://github.com/decorwdyun/DalamudPlugins");
+        }
         ImGui.Spacing();
         float width2 = ImGui.GetWindowWidth();
         if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
@@ -1390,10 +1424,9 @@ public partial class RotationConfigWindow : Window
     {
         // Adjust item spacing for better layout
         using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+        ImGui.TextWrapped("这些命令可用于直接从聊天或宏中打开或更改插件设置。");
         ImGui.NewLine();
-        ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
-        ImGui.NewLine();
-        ImGui.TextWrapped("Simply right clicking any action, setting, or toggle will pop up the macro associated with it.");
+        ImGui.TextWrapped("只需右键点击任何动作、设置或切换选项，即可弹出与之关联的宏。");
     }
 
     // Helper method to display command help
@@ -1544,54 +1577,54 @@ public partial class RotationConfigWindow : Window
 
     private void DrawAutoduty()
     {
-        ImGui.TextWrapped("While the RSR Team has made effort to make RSR compatible with Autoduty, please keep in mind that RSR is not designed with botting in mind.");
+        ImGui.TextWrapped("尽管 RSR 团队已努力使 RSR 与 AutoDuty 兼容，但请记住，RSR 并非为脚本自动化设计。");
         ImGui.Spacing();
-        ImGui.TextWrapped("This menu is for troubleshooting and initial setup purposes and is a good first step to share to get assistance.");
+        ImGui.TextWrapped("此菜单用于故障排除和初始设置，是寻求帮助时的良好起点。");
         ImGui.Spacing();
-        ImGui.TextWrapped("Below are relevant settings and their current states for RSR to work well with AutoDuty mode.");
+        ImGui.TextWrapped("以下是确保 RSR 在 AutoDuty 模式下正常运行的相关设置及其当前状态。");
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
         // Display the current HostileType
-        ImGui.TextWrapped($"Current Targeting Mode: {GetHostileTypeDescription(DataCenter.CurrentTargetToHostileType)}");
+        ImGui.TextWrapped($"当前目标模式: {GetHostileTypeDescription(DataCenter.CurrentTargetToHostileType)}");
 
         // Add a button to change the targeting to AllTargetsCanAttack (type 0) aka Autoduty Mode
-        if (ImGui.Button("Change Targeting to Autoduty Mode"))
+        if (ImGui.Button("切换到 Autoduty 模式"))
         {
             SetTargetingType(TargetHostileType.AllTargetsCanAttack);
         }
 
         // Display the current NPC Heal/Raise Support status
-        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise3}");
-        if (ImGui.Button("Enable NPC Heal/Raise Support"))
+        ImGui.TextWrapped($"NPC治疗/复活支持已启用: {Service.Config.FriendlyPartyNpcHealRaise3}");
+        if (ImGui.Button("启用NPC治疗/复活支持"))
         {
             Service.Config.FriendlyPartyNpcHealRaise3.Value = true;
         }
         ImGui.Spacing();
         // Display the Auto Off Between Area status
-        ImGui.TextWrapped($"Auto Off Between Areas: {Service.Config.AutoOffBetweenArea}");
-        if (ImGui.Button("Disable Auto Off Between Areas"))
+        ImGui.TextWrapped($"区域切换时自动关闭: {Service.Config.AutoOffBetweenArea}");
+        if (ImGui.Button("禁用区域切换时自动关闭"))
         {
             Service.Config.AutoOffBetweenArea.Value = false;
         }
         ImGui.Spacing();
         // Display the Auto Off Cut Scene status
-        ImGui.TextWrapped($"Auto Off During Cutscenes: {Service.Config.AutoOffCutScene}");
-        if (ImGui.Button("Disable Auto Off During Cutscenes"))
+        ImGui.TextWrapped($"过场动画期间自动关闭: {Service.Config.AutoOffCutScene}");
+        if (ImGui.Button("禁用过场动画期间自动关闭"))
         {
             Service.Config.AutoOffCutScene.Value = false;
         }
         ImGui.Spacing();
         // Display the Auto Off After Combat Time status
-        ImGui.TextWrapped($"Auto Off After Combat: {Service.Config.AutoOffAfterCombat}");
-        if (ImGui.Button("Disable Auto Off After Combat"))
+        ImGui.TextWrapped($"战斗结束后自动关闭: {Service.Config.AutoOffAfterCombat}");
+        if (ImGui.Button("禁用战斗结束后自动关闭"))
         {
             Service.Config.AutoOffAfterCombat.Value = false;
         }
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
-        ImGui.TextWrapped($"Below are plugins used by Autoduty and their current states");
+        ImGui.TextWrapped($"以下是 AutoDuty 可能会使用的插件及其当前状态");
         ImGui.Spacing();
 
         // Create a new list of AutoDutyPlugin objects
@@ -1623,66 +1656,66 @@ public partial class RotationConfigWindow : Window
 
             bool isEnabled = plugin.IsEnabled;
             bool isInstalled = plugin.IsInstalled;
-
+            
             // Add a button to copy the URL to the clipboard if the plugin is not installed
-            if (!isEnabled)
-            {
-                if (DalamudReflector.HasRepo(plugin.Url) && !isInstalled)
-                {
-                    if (ImGui.Button($"Add Plugin##{plugin.Name}"))
-                    {
-                        PluginLog.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
-                        _ = DalamudReflector.AddPlugin(plugin.Url, plugin.Name).ContinueWith(t =>
-                        {
-                            if (t.IsCompletedSuccessfully && t.Result)
-                            {
-                                PluginLog.Information($"Successfully added plugin: {plugin.Name} from URL: {plugin.Url}");
-                            }
-                            else
-                            {
-                                PluginLog.Error($"Failed to add plugin: {plugin.Name} from URL: {plugin.Url}");
-                            }
-                            // Refresh plugin masters after install
-                            DalamudReflector.ReloadPluginMasters();
-                        });
-                    }
-                    ImGui.SameLine();
-                }
-                else if (!DalamudReflector.HasRepo(plugin.Url))
-                {
-                    if (ImGui.Button($"Add Repo##{plugin.Name}"))
-                    {
-                        PluginLog.Information($"Attempting to add repository: {plugin.Url}");
-                        DalamudReflector.AddRepo(plugin.Url, true);
-                        DalamudReflector.ReloadPluginMasters();
-                        PluginLog.Information($"Successfully added repository: {plugin.Url}");
-                    }
-                    ImGui.SameLine();
-                }
-            }
-
+            // if (!isEnabled)
+            // {
+            //     if (DalamudReflector.HasRepo(plugin.Url) && !isInstalled)
+            //     {
+            //         if (ImGui.Button($"Add Plugin##{plugin.Name}"))
+            //         {
+            //             PluginLog.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
+            //             _ = DalamudReflector.AddPlugin(plugin.Url, plugin.Name).ContinueWith(t =>
+            //             {
+            //                 if (t.IsCompletedSuccessfully && t.Result)
+            //                 {
+            //                     PluginLog.Information($"Successfully added plugin: {plugin.Name} from URL: {plugin.Url}");
+            //                 }
+            //                 else
+            //                 {
+            //                     PluginLog.Error($"Failed to add plugin: {plugin.Name} from URL: {plugin.Url}");
+            //                 }
+            //                 // Refresh plugin masters after install
+            //                 DalamudReflector.ReloadPluginMasters();
+            //             });
+            //         }
+            //         ImGui.SameLine();
+            //     }
+            //     else if (!DalamudReflector.HasRepo(plugin.Url))
+            //     {
+            //         if (ImGui.Button($"Add Repo##{plugin.Name}"))
+            //         {
+            //             PluginLog.Information($"Attempting to add repository: {plugin.Url}");
+            //             DalamudReflector.AddRepo(plugin.Url, true);
+            //             DalamudReflector.ReloadPluginMasters();
+            //             PluginLog.Information($"Successfully added repository: {plugin.Url}");
+            //         }
+            //         ImGui.SameLine();
+            //     }
+            // }
+            
             // Determine the color and text for "Boss Mod"
             Vector4 color;
             string text;
             if (plugin.Name == "Boss Mod" && isBossModEnabled && isBossModRebornEnabled)
             {
                 color = ImGuiColors.DalamudYellow;
-                text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}. Both Boss Mods cannot be installed and enabled at the same time. Please disable Boss Mod.";
+                text = $"{plugin.Name} is {(isEnabled ? "已安装并启用" : "未启用")}。两个Boss Mod插件无法同时启用。请禁用Boss Mod。";
             }
             else if (plugin.Name == "Boss Mod" && isBossModEnabled && !isBossModRebornEnabled)
             {
                 color = isEnabled ? ImGuiColors.DalamudYellow : ImGuiColors.DalamudRed;
-                text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}. Please use BossModReborn instead, BMR has specific integration with RSR that improves RSRs ability to react to combat i.e. Gaze effects.";
+                text = $"{plugin.Name} is {(isEnabled ? "已安装并启用" : "未启用")} 。建议使用BossModReborn代替，BMR与RSR有特殊集成，能提升RSR对战斗事件的响应能力(例如背对机制)。";
             }
             else if (plugin.Name == "BossModReborn" && isBossModRebornEnabled && !isBossModEnabled)
             {
                 color = isEnabled ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed;
-                text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}.";
+                text = $"{plugin.Name} {(isEnabled ? "已安装并启用" : "未启用")}";
             }
             else
             {
                 color = isEnabled ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed;
-                text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}";
+                text = $"{plugin.Name} {(isEnabled ? "已安装并启用" : "未启用")}";
             }
 
             ImGui.PushStyleColor(ImGuiCol.Text, color);
@@ -2038,7 +2071,8 @@ public partial class RotationConfigWindow : Window
                         longest = c.DisplayValues[i];
                 }
                 ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
-                if (ImGui.Combo(name, ref index, names, names.Length))
+                var translatedDisplayValues = c.DisplayValues.Select(I18NHelper.Translate).ToArray();
+                if (ImGui.Combo(name, ref index, translatedDisplayValues, translatedDisplayValues.Length))
                 {
                     c.Value = names[index];
                 }
@@ -2085,7 +2119,7 @@ public partial class RotationConfigWindow : Window
                 string val = config.Value;
 
                 ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-                if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
+                if (ImGui.InputTextWithHint(name, I18NHelper.Translate(config.DisplayName), ref val, 128))
                 {
                     config.Value = val;
                 }
@@ -2110,20 +2144,20 @@ public partial class RotationConfigWindow : Window
             }
 
             ImGui.SameLine();
-            ImGui.TextWrapped($"{config.DisplayName}");
+            ImGui.TextWrapped($"{I18NHelper.Translate(config.DisplayName)}");
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
 
         if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.DNC))
         {
             ImGui.Spacing();
-            ImGui.Text("Dance Partner Priority");
+            ImGui.Text("舞伴优先级");
             ImGui.Spacing();
             //var currentDancePartnerPriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.DancePartner, 0, SpecialActionType.None);
             //ImGui.Text($"Current Target: {currentDancePartnerPriority?.Name ?? "None"}");
             //ImGui.Spacing();
 
-            if (ImGui.Button("Reset to Default"))
+            if (ImGui.Button("还原"))
             {
                 OtherConfiguration.ResetDancePartnerPriority();
             }
@@ -2767,28 +2801,28 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update Invuln Status List"))
+            if (ImGui.Button("重置并更新 Invuln Status List"))
             {
                 OtherConfiguration.ResetInvincibleStatus();
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_Invincibility.GetDescription());
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update Priority Status List"))
+            if (ImGui.Button("重置并更新e Priority Status List"))
             {
                 OtherConfiguration.ResetPriorityStatus();
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_Priority.GetDescription());
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update Dispell Debuff List"))
+            if (ImGui.Button("重置并更新 Dispell Debuff List"))
             {
                 OtherConfiguration.ResetDangerousStatus();
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_DangerousStatus.GetDescription());
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update No Casting Status List"))
+            if (ImGui.Button("重置并更新e No Casting Status List"))
             {
                 OtherConfiguration.ResetNoCastingStatus();
             }
@@ -3023,21 +3057,21 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update Tankbuster List"))
+            if (ImGui.Button("重置并更新 Tankbuster List"))
             {
                 OtherConfiguration.ResetHostileCastingTank();
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingTank.GetDescription());
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update AOE List"))
+            if (ImGui.Button("重置并更新 AOE List"))
             {
                 OtherConfiguration.ResetHostileCastingArea();
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingArea.GetDescription());
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("Reset and Update Knockback List"))
+            if (ImGui.Button("重置并更新 Knockback List"))
             {
                 OtherConfiguration.ResetHostileCastingKnockback();
             }

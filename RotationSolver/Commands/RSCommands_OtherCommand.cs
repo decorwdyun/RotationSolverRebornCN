@@ -3,6 +3,7 @@ using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
+using RotationSolver.Helpers;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands;
@@ -432,7 +433,7 @@ public static partial class RSCommands
             {
                 if (Service.Config.ShowToggledSettingInChat)
                 {
-                    Svc.Chat.Print($"Changed setting {config.DisplayName} to {config.Value}");
+                    Svc.Chat.Print($"Changed setting {I18NHelper.Translate(config.DisplayName)} to {config.Value}");
                 }
                 return;
             }
@@ -451,7 +452,7 @@ public static partial class RSCommands
             {
                 if (Service.Config.ShowToggledSettingInChat)
                 {
-                    Svc.Chat.Print($"Changed setting {config.DisplayName} to {config.Value}");
+                    Svc.Chat.Print($"Changed setting {I18NHelper.Translate(config.DisplayName)} to {config.Value}");
                 }
                 return;
             }
