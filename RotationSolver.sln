@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebornRotations", "RebornRo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RotationSolver.DocumentationGenerator", "RotationSolver.DocumentationGenerator\RotationSolver.DocumentationGenerator.csproj", "{17FAD28D-4AC9-42DE-94D0-98ED1BE86595}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RotationSolver.Translator", "RotationSolver.Translator\RotationSolver.Translator.csproj", "{899AB9E7-AFE2-427D-AFC9-6B107682A7E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -65,6 +67,10 @@ Global
 		{17FAD28D-4AC9-42DE-94D0-98ED1BE86595}.Debug|x64.Build.0 = Debug|x64
 		{17FAD28D-4AC9-42DE-94D0-98ED1BE86595}.Release|x64.ActiveCfg = Release|x64
 		{17FAD28D-4AC9-42DE-94D0-98ED1BE86595}.Release|x64.Build.0 = Release|x64
+		{899AB9E7-AFE2-427D-AFC9-6B107682A7E4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{899AB9E7-AFE2-427D-AFC9-6B107682A7E4}.Debug|x64.Build.0 = Debug|Any CPU
+		{899AB9E7-AFE2-427D-AFC9-6B107682A7E4}.Release|x64.ActiveCfg = Release|Any CPU
+		{899AB9E7-AFE2-427D-AFC9-6B107682A7E4}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

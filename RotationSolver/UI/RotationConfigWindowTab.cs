@@ -68,6 +68,31 @@ internal enum RotationConfigWindowTab : byte
     [TabIcon(Icon = 4)] AutoDuty,
 }
 
+internal static class RotationConfigWindowTabExtensions
+{
+    public static string ToFriendlyString(this RotationConfigWindowTab rotationConfigWindowTab)
+    {
+        return rotationConfigWindowTab switch
+        {
+            RotationConfigWindowTab.About => "关于",
+            RotationConfigWindowTab.Rotation => "循环",
+            RotationConfigWindowTab.Main => "主窗口",
+            RotationConfigWindowTab.Job => "职业",
+            RotationConfigWindowTab.Duty => "任务",
+            RotationConfigWindowTab.Actions => "技能",
+            RotationConfigWindowTab.Rotations => "循环",
+            RotationConfigWindowTab.List => "列表",
+            RotationConfigWindowTab.Basic => "基础",
+            RotationConfigWindowTab.UI => "界面",
+            RotationConfigWindowTab.Auto => "自动",
+            RotationConfigWindowTab.Target => "目标",
+            RotationConfigWindowTab.Extra => "额外",
+            RotationConfigWindowTab.Debug => "调试",
+            _ => rotationConfigWindowTab.ToString()
+        };
+    }
+}
+
 /// <summary>
 /// Struct representing an incompatible plugin.
 /// </summary>

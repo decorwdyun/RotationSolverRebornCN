@@ -6,7 +6,7 @@ namespace RotationSolver
     {
         public static string ToStateString(this StateCommandType stateType, JobRole role)
         {
-            return stateType == StateCommandType.Auto ? $"{stateType} ({DataCenter.TargetingType.GetDescription()})" : stateType.ToString();
+            return stateType == StateCommandType.Auto ? $"{stateType.ToFriendlyString()} (目标：{DataCenter.TargetingType.GetDescription()})" : stateType.ToFriendlyString();
         }
 
         public static string ToSpecialString(this SpecialCommandType specialType, JobRole role)

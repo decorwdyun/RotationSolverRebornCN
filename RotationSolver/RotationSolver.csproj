@@ -41,4 +41,9 @@
 		<Using Include="ImGuiNET" />
 		<Using Include="Newtonsoft.Json" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Translations.json" />
+		<EmbeddedResource Include="Translations.json" />
+	</ItemGroup>
 </Project>

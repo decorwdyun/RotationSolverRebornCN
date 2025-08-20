@@ -553,36 +553,36 @@ internal static class RotationUpdater
                 }
                 else if (act.Action.ActionCategory.RowId is 10 or 11)
                 {
-                    key = "System Action";
+                    key = "共通技能";
                 }
                 else if (act.Action.IsRoleAction)
                 {
-                    key = "Role Action";
+                    key = "职能技能";
                 }
                 else if (act.Info.IsLimitBreak)
                 {
-                    key = "Limit Break";
+                    key = "极限技（LB）";
                 }
                 else if (act.Info.IsDutyAction)
                 {
-                    key = "Duty Action";
+                    key = "任务技能";
                 }
                 else
                 {
                     key = act.Info.IsRealGCD ? "GCD" : "oGCD";
                     if (act.Setting.IsFriendly)
                     {
-                        key += "-Friendly";
+                        key += "-其他";
                     }
                     else
                     {
-                        key += "-Attack";
+                        key += "-输出";
                     }
                 }
             }
             else if (a is IBaseItem)
             {
-                key = "Item";
+                key = "物品";
             }
 
             if (!string.IsNullOrEmpty(key))

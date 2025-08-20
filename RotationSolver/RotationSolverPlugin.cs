@@ -2,6 +2,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
@@ -23,6 +24,7 @@ namespace RotationSolver;
 
 public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 {
+    private readonly IDalamudPluginInterface pi;
     private readonly WindowSystem windowSystem;
 
     private static RotationConfigWindow? _rotationConfigWindow;
@@ -41,8 +43,45 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     private static readonly Random _random = new();
 
     internal IPCProvider IPCProvider;
-    public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
+    public RotationSolverPlugin(IDalamudPluginInterface pluginInterface, IToastGui toastGui, INotificationManager notificationManager)
     {
+        pi = pluginInterface;
+#if !DEBUG
+        bool RepoCheck()
+        {
+            var sourceRepository = pi.SourceRepository;
+            return sourceRepository == "https://gp.xuolu.com/love.json" || sourceRepository.Contains("decorwdyun/DalamudPlugins", StringComparison.OrdinalIgnoreCase);
+        }
+        if ((pi.IsDev || !RepoCheck()))
+        {
+            toastGui.ShowError("请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n" +
+                               "请看右下角提示，插件禁止本地加载，\n");
+            notificationManager.AddNotification(new Dalamud.Interface.ImGuiNotification.Notification()
+            {
+                Type = Dalamud.Interface.ImGuiNotification.NotificationType.Error,
+                Title = "加载验证",
+                Content = "由于本地加载或安装来源仓库非 decorwdyun 个人仓库，插件禁止加载。",
+            });
+            return;
+        }
+#endif
         ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
         _ = Svc.Framework.RunOnTick(() =>
         {
@@ -273,6 +312,17 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     public async Task Dispose()
     {
+#if !DEBUG
+        bool RepoCheck()
+        {
+            var sourceRepository = pi.SourceRepository;
+            return sourceRepository == "https://gp.xuolu.com/love.json" || sourceRepository.Contains("decorwdyun/DalamudPlugins", StringComparison.OrdinalIgnoreCase);
+        }
+        if (pi.IsDev || !RepoCheck())
+        {
+            return;
+        }
+#endif
         RSCommands.Disable();
         Watcher.Disable();
 

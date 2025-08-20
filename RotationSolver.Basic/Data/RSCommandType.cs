@@ -115,6 +115,20 @@ public enum StateCommandType : byte
     Manual,
 }
 
+public static class StateCommandTypeExtensions
+{
+    public static string ToFriendlyString(this StateCommandType stateCommandType)
+    {
+        return stateCommandType switch
+        {
+            StateCommandType.Off => "关闭",
+            StateCommandType.Auto => "自动",
+            StateCommandType.Manual => "手动",
+            _ => stateCommandType.ToString(),
+        };
+    }
+}
+
 /// <summary>
 /// Some Other Commands.
 /// </summary>

@@ -3,6 +3,7 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using Lumina.Excel.Sheets;
 using RotationSolver.Data;
+using RotationSolver.Helpers;
 
 namespace RotationSolver.UI.SearchableConfigs;
 
@@ -180,7 +181,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         get
         {
             UIAttribute? ui = _property.GetCustomAttribute<UIAttribute>();
-            return ui == null ? string.Empty : ui.Name;
+            return ui == null ? string.Empty : I18NHelper.Translate(ui.Name);
         }
     }
 
@@ -189,7 +190,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         get
         {
             UIAttribute? ui = _property.GetCustomAttribute<UIAttribute>();
-            return ui == null || string.IsNullOrEmpty(ui.Description) ? string.Empty : ui.Description;
+            return ui == null || string.IsNullOrEmpty(ui.Description) ? string.Empty : I18NHelper.Translate(ui.Description);
         }
     }
 
