@@ -6,9 +6,10 @@ namespace RotationSolver.Commands
 {
     public static partial class RSCommands
     {
-        public static string _stateString = "关", _specialString = string.Empty;
+        public static string _stateString = "Off", _specialString = string.Empty;
+        public static string _stateFriendlyString = "关";
 
-        internal static string EntryString => $"{_stateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
+        internal static string EntryString => $"{_stateFriendlyString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
 
         private static string _lastToastMessage = string.Empty;
 
@@ -106,6 +107,7 @@ namespace RotationSolver.Commands
             }
 
             _stateString = stateType.ToStateString(role);
+            _stateFriendlyString = stateType.ToStateFriendlyString(role);
             UpdateToast();
         }
 

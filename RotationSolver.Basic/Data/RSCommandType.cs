@@ -122,8 +122,8 @@ public static class StateCommandTypeExtensions
         return stateCommandType switch
         {
             StateCommandType.Off => "关闭",
-            StateCommandType.Auto => "自动",
-            StateCommandType.Manual => "手动",
+            StateCommandType.Auto => "自动目标",
+            StateCommandType.Manual => "手动目标",
             _ => stateCommandType.ToString(),
         };
     }
