@@ -6,7 +6,6 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
@@ -28,8 +27,6 @@ using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.Updaters;
 using System.Diagnostics;
 using System.Text;
-using ECommons;
-using Lumina.Excel.Sheets;
 using GAction = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
 
@@ -61,9 +58,54 @@ public partial class RotationConfigWindow : Window
     private bool _rsrIconTriggered = false;
     private const double RsrIconHoldSeconds = 1.2;
 
-    // Hints system fields
-    private static readonly string[] _usageHints =
-    [
+	private static readonly string[] _supporters =
+	[
+	"Akurosuki",
+	"Baliha",
+	"BangPowNyoom",
+	"Biscuit",
+	"catfourteen",
+	"Chaos_co",
+	"clean",
+	"Cole",
+	"DeadCode",
+	"deleted_user_e3b65ec0ca7v",
+	"Drama",
+	"Ecliptive",
+	"Elita",
+	"Ephi",
+	"Ghosty !",
+	"Hawa",
+	"Hyoh",
+	"kaen",
+	"Kialdir",
+	"kuromiromi",
+	"Lemon",
+	"LouBird",
+	"Lyn Undercroft",
+	"Miracle Ace",
+	"Miri",
+	"Nefertem",
+	"Nekomimi Bakeneko",
+	"Plogons",
+	"poop dealer",
+	"prismagreen",
+	"purrpletime",
+	"smf26",
+	"Taazaam",
+	"Toska",
+	"TuckingFypo-",
+	"Vaex_Darastrix",
+	"wax",
+	"Yona",
+	"Zoe",
+	"exialla",
+	"caffeinatedrose"
+	];
+
+	// Hints system fields
+	private static readonly string[] _baseUsageHints =
+	[
         "右键点击任意技能、设置或开关，可以查看或复制对应的宏命令。",  
         "可以使用 /rsr 作为 /rotation 的简写指令。",  
         "使用 /rotation Auto、/rotation Manual 或 /rotation Off 来快速切换模式。",  
@@ -103,12 +145,14 @@ public partial class RotationConfigWindow : Window
         "Combat Reborn 的图标由一位名叫 Altan 的玩家制作。",  
         "小提示：RSR 最适合与“传统移动方式（Legacy Type）”搭配使用。",
         "Special thanks to Akurosuki, Chaos_co, Hawa, Hyoh, kaen, kuromiromi, Miri, Nekomimi, Plogons, prismagreen, and Vaex for their support of RSR."
-    ];
-    private int _hintIndex = 0;
-    private float _lastHintSwitch = 0f;
-    private static readonly Random _hintRng = new();
+	];
+	private int _hintIndex = 0;
+	private float _lastHintSwitch = 0f;
+	private static readonly Random _hintRng = new();
+	private string? _cachedTipText = null;
+	private int _cachedTipIndex = -1;
 
-    public RotationConfigWindow()
+	public RotationConfigWindow()
     : base("###rsrConfigWindow", ImGuiWindowFlags.NoScrollbar, false)
     {
         SizeCondition = ImGuiCond.FirstUseEver;
@@ -126,7 +170,7 @@ public partial class RotationConfigWindow : Window
             ShowTooltip = () =>
             {
                 ImGui.BeginTooltip();
-                ImGui.Text("点击重置插件设置");
+                ImGui.Text("Click to reset plugin configs");
                 ImGui.EndTooltip();
             },
             Priority = 3,
@@ -143,7 +187,7 @@ public partial class RotationConfigWindow : Window
             ShowTooltip = () =>
             {
                 ImGui.BeginTooltip();
-                ImGui.Text("在 Ko-fi 上支持开发者");
+                ImGui.Text("Support the developer on Ko-fi");
                 ImGui.EndTooltip();
             },
             Priority = 2,
@@ -457,7 +501,7 @@ public partial class RotationConfigWindow : Window
             ImGui.SetClipboardText(diagInfo.ToString());
         }
     }
-    
+
     private void DrawSideBar()
     {
         using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Side bar", -Vector2.One, false, ImGuiWindowFlags.NoScrollbar);
@@ -483,10 +527,10 @@ public partial class RotationConfigWindow : Window
                     continue;
                 }
 
-                string displayName = item.ToFriendlyString();
+                string displayName = item.ToString();
                 if (item == RotationConfigWindowTab.Job && Player.Object != null)
                 {
-                    displayName = Player.ClassJob.ValueNullable?.Name.ExtractText() ?? Player.Job.ToString(); // Use the current player's job name
+                    displayName = Player.Job.ToString(); // Use the current player's job name
                 }
                 else if (item == RotationConfigWindowTab.Duty && Player.Object != null)
                 {
@@ -497,12 +541,11 @@ public partial class RotationConfigWindow : Window
 
                     displayName = true switch
                     {
-
-                        var _ when DataCenter.IsInOccultCrescentOp => $"副本 - {DutyRotation.ActivePhantomJob}",
-                        var _ when DataCenter.InVariantDungeon => "副本 - 多变迷宫",
-                        var _ when DataCenter.IsInBozja => "副本 - 博兹雅",
-                        var _ when DataCenter.IsInMonsterHunterDuty => "副本 - 怪猎联动",
-                        _ => "副本",
+                        var _ when DataCenter.IsInOccultCrescentOp => $"Duty - {DutyRotation.ActivePhantomJob}",
+                        var _ when DataCenter.InVariantDungeon => "Duty - Variant",
+                        var _ when DataCenter.IsInBozja => "Duty - Bozja",
+                        var _ when DataCenter.IsInMonsterHunterDuty => "Duty - Monster Hunter",
+                        _ => "Duty",
                     };
                 }
 
@@ -815,114 +858,172 @@ public partial class RotationConfigWindow : Window
         ImguiTooltips.HoveredTooltip(warning);
     }
 
-    // Hint bar at the top of the body
-    private void DrawHintsBar()
-    {
-        if (CheckErrors())
-        {
-            string errorText = string.Empty;
-            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+	// Decide whether to show a normal tip or a dynamic special-thanks tip.
+	// Example: 1 out of 5 times show the special thanks.
+	private static string GetDynamicHintText(int index)
+	{
+		// Show a special thanks message 1 out of every 5 times, otherwise show a normal hint.
+		if (_supporters != null && _supporters.Length > 0 && index % 5 == 0)
+		{
+			// Pick a random supporter for the special thanks message.
+			int supporterIndex = _hintRng.Next(_supporters.Length);
+			string supporter = _supporters[supporterIndex];
+			return $"Special thanks to supporter: {supporter}!";
+		}
+		// Defensive: fallback to base hints if index is valid, else a default message.
+		if (_baseUsageHints != null && _baseUsageHints.Length > 0 && index >= 0 && index < _baseUsageHints.Length)
+		{
+			return _baseUsageHints[index];
+		}
+		return "Thank you for using Rotation Solver Reborn!";
+	}
 
-            if (Watcher.DalamudBranch() != "release")
-            {
-                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
-                ImGui.TextWrapped($"Warning: You are running the '{Watcher.DalamudBranch()}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
-                ImGui.PopStyleColor();
-                ImGui.PopTextWrapPos();
-                ImGui.Spacing();
-            }
+	// Hint bar at the top of the body
+	// Hint bar at the top of the body
+	private void DrawHintsBar()
+	{
+		bool hasErrors = CheckErrors();
+		if (hasErrors)
+		{
+			string errorText = string.Empty;
+			float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
-            if (_crashPlugins.Count > 0 && _crashPlugins[0].Name != null)
-            {
-                errorText = $"Disable {_crashPlugins[0].Name}, can cause conflicts/crashes.";
-            }
-            else if (Player.Available && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
-                    Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
-                    Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
-            {
-                errorText = $"You are on an unsupported class: {Player.Job}";
-            }
+			if (Watcher.DalamudBranch() != "release")
+			{
+				ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
+				ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
+				ImGui.TextWrapped($"Warning: You are running the '{Watcher.DalamudBranch()}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
+				ImGui.PopStyleColor();
+				ImGui.PopTextWrapPos();
+				ImGui.Spacing();
+			}
 
-            if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count != 0)
-            {
-                List<string> warningsToRemove = [];
+			if (_crashPlugins.Count > 0 && _crashPlugins[0].Name != null)
+			{
+				errorText = $"Disable {_crashPlugins[0].Name}, can cause conflicts/crashes.";
+			}
+			else if (Player.Available && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+					Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+					Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+			{
+				errorText = $"You are on an unsupported class: {Player.Job}";
+			}
 
-                foreach (string warning in DataCenter.SystemWarnings.Keys)
-                {
-                    using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
-                    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+			if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count != 0)
+			{
+				List<string> warningsToRemove = [];
 
-                    // Calculate the required height for the button
-                    Vector2 textSize = ImGui.CalcTextSize(warning, false, availableWidth);
-                    float buttonHeight = textSize.Y + (ImGui.GetStyle().FramePadding.Y * 2);
-                    float lineHeight = ImGui.GetTextLineHeight();
-                    int lineCount = (int)Math.Ceiling(textSize.X / availableWidth);
+				foreach (string warning in DataCenter.SystemWarnings.Keys)
+				{
+					using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
+					ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
 
-                    if (ImGui.Button(warning, new Vector2(availableWidth, buttonHeight)))
-                    {
-                        warningsToRemove.Add(warning);
-                    }
+					// Calculate the required height for the button
+					Vector2 textSize = ImGui.CalcTextSize(warning, false, availableWidth);
+					float buttonHeight = textSize.Y + (ImGui.GetStyle().FramePadding.Y * 2);
+					float lineHeight = ImGui.GetTextLineHeight();
+					int lineCount = (int)Math.Ceiling(textSize.X / availableWidth);
 
-                    ImGui.PopTextWrapPos(); // Reset text wrapping position
-                }
+					if (ImGui.Button(warning, new Vector2(availableWidth, buttonHeight)))
+					{
+						warningsToRemove.Add(warning);
+					}
 
-                // Remove warnings that were cleared
-                foreach (string warning in warningsToRemove)
-                {
-                    _ = DataCenter.SystemWarnings.Remove(warning);
-                }
-            }
+					ImGui.PopTextWrapPos(); // Reset text wrapping position
+				}
 
-            if (errorText != string.Empty)
-            {
-                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
-                ImGui.Text(errorText);
-                ImGui.PopStyleColor(); // Reset text color
-                ImGui.PopTextWrapPos(); // Reset text wrapping position
-            }
+				// Remove warnings that were cleared
+				foreach (string warning in warningsToRemove)
+				{
+					_ = DataCenter.SystemWarnings.Remove(warning);
+				}
+			}
 
-            ImGui.Separator();
-            ImGui.Spacing();
-        }
+			if (errorText != string.Empty)
+			{
+				ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+				ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
+				ImGui.Text(errorText);
+				ImGui.PopStyleColor(); // Reset text color
+				ImGui.PopTextWrapPos(); // Reset text wrapping position
+			}
 
-        if (!Service.Config.ShowHints)
-        {
-            return;
-        }
+			ImGui.Separator();
+			ImGui.Spacing();
+		}
 
-        if (_usageHints == null || _usageHints.Length == 0)
-        {
-            return;
-        }
+		// If hints are disabled or we have no base hints, do nothing.
+		if (!Service.Config.ShowHints)
+		{
+			return;
+		}
+		if (_baseUsageHints == null || _baseUsageHints.Length == 0)
+		{
+			return;
+		}
 
-        float now = (float)ImGui.GetTime();
-        if (now - _lastHintSwitch >= 7f)
-        {
-            _lastHintSwitch = now;
-            int next;
-            do
-            {
-                next = _hintRng.Next(_usageHints.Length);
-            } while (next == _hintIndex && _usageHints.Length > 1);
-            _hintIndex = next;
-        }
+		// Advance hint periodically when no errors are present (so warnings don't rapidly cycle tips).
+		const float HintSwitchIntervalSeconds = 8f;
+		float now = (float)ImGui.GetTime();
+		if (!hasErrors)
+		{
+			if (now - _lastHintSwitch >= HintSwitchIntervalSeconds)
+			{
+				_lastHintSwitch = now;
+				_hintIndex++;
+				if (_hintIndex >= _baseUsageHints.Length)
+				{
+					_hintIndex = 0;
+				}
+				// index changed, invalidate cached tip
+				_cachedTipIndex = -1;
+				_cachedTipText = null;
+			}
+		}
+		else
+		{
+			// When errors are shown, reset the switch timer so it resumes cleanly afterward.
+			_lastHintSwitch = now;
+		}
 
-        using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(12)))
-        using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow)))
-        {
-            float avail = ImGui.GetContentRegionAvail().X;
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + avail);
-            ImGui.TextWrapped($"小技巧: {_usageHints[_hintIndex]}");
-            ImGui.PopTextWrapPos();
-        }
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-    }
+		// Generate tip only when index changes; this avoids random flicker per frame.
+		if (_cachedTipIndex != _hintIndex || string.IsNullOrEmpty(_cachedTipText))
+		{
+			_cachedTipText = $"Tip: {GetDynamicHintText(_hintIndex)}";
+			_cachedTipIndex = _hintIndex;
+		}
 
-    private void DrawBody()
+		using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(12)))
+		using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow)))
+		{
+			float avail = ImGui.GetContentRegionAvail().X;
+			ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + avail);
+
+			ImGui.TextWrapped(_cachedTipText);
+			if (ImGui.IsItemHovered())
+			{
+				ImguiTooltips.HoveredTooltip("Right-click to copy this tip.");
+				if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+				{
+					try
+					{
+						ImGui.SetClipboardText(_cachedTipText);
+					}
+					catch
+					{
+						// ignored
+					}
+				}
+			}
+
+			ImGui.PopTextWrapPos();
+		}
+		ImGui.Spacing();
+		ImGui.Separator();
+		ImGui.Spacing();
+	}
+
+	private void DrawBody()
     {
         // Adjust cursor position
         ImGui.SetCursorPos(ImGui.GetCursorPos() + (Vector2.One * 8 * Scale));
@@ -1225,8 +1326,7 @@ public partial class RotationConfigWindow : Window
                     if (names[i].Length > longest.Length) longest = names[i];
                 }
                 ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
-                var translatedDisplayValues = c.DisplayValues.Select(I18NHelper.Translate).ToArray();
-                if (ImGui.Combo(name, ref index, translatedDisplayValues, translatedDisplayValues.Length))
+                if (ImGui.Combo(name, ref index, names, names.Length))
                 {
                     c.Value = names[index];
                 }
@@ -1273,7 +1373,7 @@ public partial class RotationConfigWindow : Window
                 if (s.PhantomJob != DutyRotation.PhantomJob.None && s.PhantomJob != phantomJob) continue;
                 string val = config.Value;
                 ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-                if (ImGui.InputTextWithHint(name, I18NHelper.Translate(config.DisplayName), ref val, 128))
+                if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
                 {
                     config.Value = val;
                 }
@@ -1299,7 +1399,7 @@ public partial class RotationConfigWindow : Window
             }
 
             ImGui.SameLine();
-            ImGui.TextWrapped($"{I18NHelper.Translate(config.DisplayName)}");
+            ImGui.TextWrapped($"{config.DisplayName}");
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
     }
@@ -1327,40 +1427,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
         }
-        ImGui.Spacing();
-        using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
-        {
-            ImGui.TextColored(ImGuiColors.HealerGreen, "遇到问题也可以点击插件窗口右上角骷髅头重置插件配置");
-        }
-        
-        using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(14)))
-        {
-            float r = 0, g = 0, b = 0;
-            var h = (float)(ImGui.GetTime() * 0.2f % 1.0f);
-            ImGui.ColorConvertHSVtoRGB(h, 1f, 1f, ref r, ref g, ref b);
-            ImGui.TextColored(new Vector4(r, g, b, 1), "本汉化插件完全开源免费，从未委托任何人在任何渠道售卖。");
-            ImGui.TextColored(new Vector4(r, g, b, 1), "如果你是付费购买的本插件，请立即退款并差评举报。");
-        }
 
-        if (ImGui.Button("打开插件主页"))
-        {
-            Util.OpenLink("https://github.com/decorwdyun/RotationSolverRebornCN");
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("一起翻译"))
-        {
-            Util.OpenLink("https://github.com/decorwdyun/RotationSolverRebornCN/blob/cn/RotationSolver/Translations.json");
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("问题反馈"))
-        {
-            Util.OpenLink("https://github.com/decorwdyun/RotationSolverRebornCN/issues/new");
-        }
-        ImGui.SameLine();
-        if (ImGui.Button("汉化作者维护的更多插件"))
-        {
-            Util.OpenLink("https://github.com/decorwdyun/DalamudPlugins");
-        }
         ImGui.Spacing();
         float width2 = ImGui.GetWindowWidth();
         if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
@@ -1398,13 +1465,81 @@ public partial class RotationConfigWindow : Window
 
     private static readonly CollapsingHeaderGroup _aboutHeaders = new(new()
     {
-        { UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
+		{ UiString.ConfigWindow_About_ThanksToSupporters.GetDescription, DrawThanksToSupporters },
+		{ UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
         { UiString.ConfigWindow_About_SettingMacros.GetDescription, DrawAboutSettingsCommands },
         { UiString.ConfigWindow_About_Compatibility.GetDescription, DrawAboutCompatibility },
         { UiString.ConfigWindow_About_Links.GetDescription, DrawAboutLinks },
     });
 
-    private static void DrawAboutMacros()
+	private static void DrawThanksToSupporters()
+	{
+		// Ko-fi CTA
+		if (ImGui.Button("Join this list!"))
+		{
+			Util.OpenLink("https://ko-fi.com/ltscombatreborn");
+		}
+
+		ImGui.Spacing();
+		ImGui.Separator();
+		ImGui.Spacing();
+
+		// Defensive: ensure we have supporters
+		if (_supporters == null || _supporters.Length == 0)
+		{
+			ImGui.TextWrapped("No supporters to display yet. Thank you for checking!");
+			return;
+		}
+
+		// Header text
+		using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(16)))
+		using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedGreen)))
+		{
+			ImGui.TextWrapped($"Special thanks to {_supporters.Length} supporters:");
+		}
+
+		ImGui.Spacing();
+
+		// Layout: table of supporter names (multi-column, wraps nicely)
+		const int columns = 3;
+		using ImRaii.IEndObject table = ImRaii.Table("SupportersTable", columns, ImGuiTableFlags.SizingStretchProp);
+		if (!table)
+			return;
+
+		// Pre-sort for stable display
+		var names = new List<string>(_supporters);
+		names.Sort(StringComparer.OrdinalIgnoreCase);
+
+		// Compute per-row distribution
+		int perCol = (int)Math.Ceiling(names.Count / (float)columns);
+		int idx = 0;
+
+		for (int col = 0; col < columns; col++)
+		{
+			ImGui.TableNextColumn();
+			int end = Math.Min(idx + perCol, names.Count);
+
+			for (int i = idx; i < end; i++)
+			{
+				string name = names[i];
+
+				// Draw each name as a selectable text; right-click copies to clipboard
+				bool selected = ImGui.Selectable(name, false, ImGuiSelectableFlags.AllowDoubleClick);
+
+				// Small visual break
+				ImGui.Spacing();
+			}
+
+			idx = end;
+		}
+
+		ImGui.Spacing();
+		ImGui.Separator();
+		ImGui.Spacing();
+	}
+	#endregion
+
+	private static void DrawAboutMacros()
     {
         // Adjust item spacing for better layout
         using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
@@ -1442,9 +1577,10 @@ public partial class RotationConfigWindow : Window
     {
         // Adjust item spacing for better layout
         using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
-        ImGui.TextWrapped("这些命令可用于直接从聊天或宏中打开或更改插件设置。");
         ImGui.NewLine();
-        ImGui.TextWrapped("只需右键点击任何动作、设置或切换选项，即可弹出与之关联的宏。");
+        ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
+        ImGui.NewLine();
+        ImGui.TextWrapped("Simply right clicking any action, setting, or toggle will pop up the macro associated with it.");
     }
 
     // Helper method to display command help
@@ -1589,7 +1725,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Failed to load GitHub icon.");
         }
     }
-    #endregion
+    
 
     #region Autoduty
 
@@ -1674,7 +1810,7 @@ public partial class RotationConfigWindow : Window
 
             bool isEnabled = plugin.IsEnabled;
             bool isInstalled = plugin.IsInstalled;
-            
+
             // Add a button to copy the URL to the clipboard if the plugin is not installed
             // if (!isEnabled)
             // {
@@ -3049,7 +3185,7 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
             _ = ImGui.TableNextColumn();
-            if (ImGui.Button("重置并更新 Tankbuster List"))
+            if (ImGui.Button("Reset and Update Tankbuster List"))
             {
                 OtherConfiguration.ResetHostileCastingTank();
             }
@@ -3862,7 +3998,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Current Mitigation Percent: {mitigationFraction * 100f:F1}%");
         ImGui.Text($"Current Mitigation Percent RAW: {mitigationFraction}");
 
-        ImGui.Text($"Is Magical Damage Incoming: {CustomRotation.IsMagicalDamageIncoming()}");
+        ImGui.Text($"Is Magical Damage Incoming: {CustomRotation.IsMagicalDamageIncoming}");
     }
 
     private static unsafe void DrawTargetData()
