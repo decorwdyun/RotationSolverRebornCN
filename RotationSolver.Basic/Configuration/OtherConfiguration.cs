@@ -379,7 +379,7 @@ internal class OtherConfiguration
         {
             try
             {
-                string url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json";
+                string url = $"https://v6.gh-proxy.org/https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json";
                 string str = Http.GetStringAsync(url).Result;
 
                 File.WriteAllText(path, str);

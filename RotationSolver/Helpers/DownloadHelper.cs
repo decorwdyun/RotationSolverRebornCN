@@ -23,7 +23,7 @@ public static class DownloadHelper
 
     public static async Task DownloadAsync()
     {
-        IncompatiblePlugins = await DownloadOneAsync<IncompatiblePlugin[]>($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/IncompatiblePlugins.json") ?? [];
+        IncompatiblePlugins = await DownloadOneAsync<IncompatiblePlugin[]>($"https://v6.gh-proxy.org/https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/IncompatiblePlugins.json") ?? [];
     }
 
     private static async Task<T?> DownloadOneAsync<T>(string url)

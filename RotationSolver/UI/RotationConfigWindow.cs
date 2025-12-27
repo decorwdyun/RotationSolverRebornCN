@@ -245,7 +245,7 @@ public partial class RotationConfigWindow : Window
         // Preload logo texture once
         try
         {
-            string logoUrl = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
+            string logoUrl = $"https://v6.gh-proxy.org/https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
             if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out IDalamudTextureWrap? logo) && logo != null)
             {
                 _logoTexture = logo;
@@ -527,10 +527,10 @@ public partial class RotationConfigWindow : Window
                     continue;
                 }
 
-                string displayName = item.ToString();
+                string displayName = item.ToFriendlyString();
                 if (item == RotationConfigWindowTab.Job && Player.Object != null)
                 {
-                    displayName = Player.Job.ToString(); // Use the current player's job name
+                    displayName = Player.ClassJob.ValueNullable?.Name.ExtractText() ?? Player.Job.ToString(); // Use the current player's job name
                 }
                 else if (item == RotationConfigWindowTab.Duty && Player.Object != null)
                 {
@@ -541,10 +541,10 @@ public partial class RotationConfigWindow : Window
 
                     displayName = true switch
                     {
-                        var _ when DataCenter.IsInOccultCrescentOp => $"Duty - {DutyRotation.ActivePhantomJob}",
-                        var _ when DataCenter.InVariantDungeon => "Duty - Variant",
-                        var _ when DataCenter.IsInBozja => "Duty - Bozja",
-                        var _ when DataCenter.IsInMonsterHunterDuty => "Duty - Monster Hunter",
+                        var _ when DataCenter.IsInOccultCrescentOp => $"副本 - {DutyRotation.ActivePhantomJob}",
+                        var _ when DataCenter.InVariantDungeon => "副本 - 多变迷宫",
+                        var _ when DataCenter.IsInBozja => "副本 - 博兹雅",
+                        var _ when DataCenter.IsInMonsterHunterDuty => "副本 - 怪猎联动",
                         _ => "Duty",
                     };
                 }
@@ -660,7 +660,7 @@ public partial class RotationConfigWindow : Window
                     if ((DateTime.UtcNow - _lastLogoFetchAttempt).TotalSeconds > 1)
                     {
                         _lastLogoFetchAttempt = DateTime.UtcNow;
-                        string logoUrl = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
+                        string logoUrl = $"https://v6.gh-proxy.org/https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
                         if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out IDalamudTextureWrap? logo) && logo?.Handle != null)
                         {
                             _logoTexture = logo;
@@ -1326,7 +1326,8 @@ public partial class RotationConfigWindow : Window
                     if (names[i].Length > longest.Length) longest = names[i];
                 }
                 ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
-                if (ImGui.Combo(name, ref index, names, names.Length))
+                var translatedDisplayValues = c.DisplayValues.Select(I18NHelper.Translate).ToArray();
+                if (ImGui.Combo(name, ref index, translatedDisplayValues, translatedDisplayValues.Length))
                 {
                     c.Value = names[index];
                 }
@@ -1373,7 +1374,7 @@ public partial class RotationConfigWindow : Window
                 if (s.PhantomJob != DutyRotation.PhantomJob.None && s.PhantomJob != phantomJob) continue;
                 string val = config.Value;
                 ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-                if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
+                if (ImGui.InputTextWithHint(name, I18NHelper.Translate(config.DisplayName), ref val, 128))
                 {
                     config.Value = val;
                 }
@@ -1399,7 +1400,7 @@ public partial class RotationConfigWindow : Window
             }
 
             ImGui.SameLine();
-            ImGui.TextWrapped($"{config.DisplayName}");
+            ImGui.TextWrapped($"{I18NHelper.Translate(config.DisplayName)}");
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
     }
@@ -1637,7 +1638,7 @@ public partial class RotationConfigWindow : Window
                 _ = ImGui.TableNextColumn();
 
                 string icon = string.IsNullOrEmpty(item.Icon)
-                    ? "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
+                    ? "https://v6.gh-proxy.org/https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
                     : item.Icon;
 
                 if (IconSet.GetTexture(icon, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
@@ -1786,12 +1787,12 @@ public partial class RotationConfigWindow : Window
         [
             new AutoDutyPlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/erdelf" },
             new AutoDutyPlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
-            new AutoDutyPlugin { Name = "BossModReborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
+            new AutoDutyPlugin { Name = "BossModReborn", Url = "https://v6.gh-proxy.org/https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
             new AutoDutyPlugin { Name = "Boss Mod", Url = "https://puni.sh/api/repository/veyn" },
             new AutoDutyPlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
             new AutoDutyPlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
-            new AutoDutyPlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
-            new AutoDutyPlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
+            new AutoDutyPlugin { Name = "SkipCutscene", Url = "https://v6.gh-proxy.org/https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
+            new AutoDutyPlugin { Name = "AntiAfkKick", Url = "https://v6.gh-proxy.org/https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
             new AutoDutyPlugin { Name = "Gearsetter", Url = "https://puni.sh/api/repository/vera" },
         ];
 
