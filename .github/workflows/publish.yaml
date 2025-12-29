@@ -36,7 +36,7 @@ jobs:
           Expand-Archive -Force latest.zip -DestinationPath "$env:AppData\XIVLauncherCN\addon\Hooks\dev"
 
       - name: Build Plugin
-        run: dotnet build -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.version }} -p:FileVersion=${{ env.version }} -p:PackageVersion=${{ env.version }} -p:InformationalVersion=${{ env.tag }} --output .\build
+        run: dotnet build -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.version }} -p:FileVersion=${{ env.version }} -p:PackageVersion=${{ env.version }} -p:InformationalVersion=${{ env.tag }}
 
       - name: Generate Release Notes
         shell: pwsh
@@ -73,7 +73,7 @@ jobs:
         with:
           tag_name: ${{ env.tag }}
           name: ${{ env.tag }}
-          files: ./build/RotationSolver/latest.zip
+          files: ./RotationSolver/bin/Release/RotationSolver/latest.zip
           body_path: ${{ env.release_body_path }}
           generate_release_notes: false
           draft: false
