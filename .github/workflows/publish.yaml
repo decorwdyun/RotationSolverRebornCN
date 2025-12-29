@@ -17,8 +17,10 @@ jobs:
       - name: Get Environment Variables
         run: |
           $tag = "${{ github.ref }}" -replace 'refs/tags/', ''
+          $version = $tag -replace '-cn$', ''
 
           "tag=$tag" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          "version=$version" | Out-File -Append -FilePath $Env:GITHUB_ENV
           
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -31,7 +33,7 @@ jobs:
           Expand-Archive -Force latest.zip -DestinationPath "$env:AppData\XIVLauncherCN\addon\Hooks\dev"
 
       - name: Build Plugin
-        run: dotnet build -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
+        run: dotnet build -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.version }} -p:FileVersion=${{ env.version }} -p:PackageVersion=${{ env.version }} -p:InformationalVersion=${{ env.tag }} --output .\build
 
       - name: Publish Plugin
         uses: softprops/action-gh-release@v2
