@@ -13,6 +13,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
         <Platforms>x64</Platforms>
+		<CopyLocalLockFileAssemblies>False</CopyLocalLockFileAssemblies>
     </PropertyGroup>
     <PropertyGroup>
         <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>

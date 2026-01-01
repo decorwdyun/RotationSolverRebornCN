@@ -44,7 +44,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
       <None Remove="Translations.json" />
       <EmbeddedResource Include="Translations.json" />
 	</ItemGroup>
