@@ -1809,43 +1809,43 @@ public partial class RotationConfigWindow : Window
 
             bool isEnabled = plugin.IsEnabled;
             bool isInstalled = plugin.IsInstalled;
-
-            // Add a button to copy the URL to the clipboard if the plugin is not installed
-            if (!isEnabled)
-            {
-                if (DalamudReflector.HasRepo(plugin.Url) && !isInstalled)
-                {
-                    if (ImGui.Button($"Add Plugin##{plugin.Name}"))
-                    {
-                        PluginLog.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
-                        _ = DalamudReflector.AddPlugin(plugin.Url, plugin.Name).ContinueWith(t =>
-                        {
-                            if (t.IsCompletedSuccessfully && t.Result)
-                            {
-                                PluginLog.Information($"Successfully added plugin: {plugin.Name} from URL: {plugin.Url}");
-                            }
-                            else
-                            {
-                                PluginLog.Error($"Failed to add plugin: {plugin.Name} from URL: {plugin.Url}");
-                            }
-                            // Refresh plugin masters after install
-                            DalamudReflector.ReloadPluginMasters();
-                        });
-                    }
-                    ImGui.SameLine();
-                }
-                else if (!DalamudReflector.HasRepo(plugin.Url))
-                {
-                    if (ImGui.Button($"Add Repo##{plugin.Name}"))
-                    {
-                        PluginLog.Information($"Attempting to add repository: {plugin.Url}");
-                        DalamudReflector.AddRepo(plugin.Url, true);
-                        DalamudReflector.ReloadPluginMasters();
-                        PluginLog.Information($"Successfully added repository: {plugin.Url}");
-                    }
-                    ImGui.SameLine();
-                }
-            }
+            
+            // // Add a button to copy the URL to the clipboard if the plugin is not installed
+            // if (!isEnabled)
+            // {
+            //     if (DalamudReflector.HasRepo(plugin.Url) && !isInstalled)
+            //     {
+            //         if (ImGui.Button($"Add Plugin##{plugin.Name}"))
+            //         {
+            //             PluginLog.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
+            //             _ = DalamudReflector.AddPlugin(plugin.Url, plugin.Name).ContinueWith(t =>
+            //             {
+            //                 if (t.IsCompletedSuccessfully && t.Result)
+            //                 {
+            //                     PluginLog.Information($"Successfully added plugin: {plugin.Name} from URL: {plugin.Url}");
+            //                 }
+            //                 else
+            //                 {
+            //                     PluginLog.Error($"Failed to add plugin: {plugin.Name} from URL: {plugin.Url}");
+            //                 }
+            //                 // Refresh plugin masters after install
+            //                 DalamudReflector.ReloadPluginMasters();
+            //             });
+            //         }
+            //         ImGui.SameLine();
+            //     }
+            //     else if (!DalamudReflector.HasRepo(plugin.Url))
+            //     {
+            //         if (ImGui.Button($"Add Repo##{plugin.Name}"))
+            //         {
+            //             PluginLog.Information($"Attempting to add repository: {plugin.Url}");
+            //             DalamudReflector.AddRepo(plugin.Url, true);
+            //             DalamudReflector.ReloadPluginMasters();
+            //             PluginLog.Information($"Successfully added repository: {plugin.Url}");
+            //         }
+            //         ImGui.SameLine();
+            //     }
+            // }
 
             // Determine the color and text for "Boss Mod"
             Vector4 color;
